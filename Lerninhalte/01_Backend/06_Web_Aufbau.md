@@ -9,8 +9,6 @@ Schauen Sie sich jetzt auch mal das ".Web"-Projekt an.
 
 Schauen Sie sich das Projekt an und versuchen Sie folgende Fragen zu beantworten:
 
-Wo finden Sie die «JSON-MAN» Webseite?
-
 Wenn Sie die Verzeichnisnamen anschauen, welchem Architekturmuster folgt
 diese Applikation?
 
@@ -35,11 +33,11 @@ Methode verwendet er?
 Welche URL hat die Liste aller ledgers im API-Controller-Endpunkt und was für eine Methode verwendet sie?
 
 Wo wird der Benutzername und das Passwort überprüft?
-$
+
 
 ### Teilaufgabe 1: Authentifizierung
 
-Wir spielen nun Frontend. Sie können gerne auch den richtigen POSTMAN verwenden.
+Wir spielen nun Frontend. Verwenden Sie dafür Postman.
 
 Loggen Sie sich ein, indem Sie ein JWT anfordern
 

@@ -2,14 +2,13 @@
 
 EF (EntityFramework Core) ist ein Object-Relational-Mapper (ORM) für .NET. Es ermöglicht die Interaktion mit einer Datenbank, ohne SQL schreiben zu müssen. EF Core ist eine leichtgewichtige, modulare Version von EF, die in .NET Core Anwendungen verwendet wird.
 
-Unsere Applikation verwendet derzeit noch kein EF Core, sondern arbeitet mit ADO.NET. In diesem Auftrag werden wir EF Core in die Applikation integrieren.
+Unsere Applikation verwendet derzeit an gewissen Orten ein EF Core. Prüfen Sie wo EF Core verwendet wird und wo noch nicht.
 
 Bauen sie die bestehende Applikation so um, dass sie EF Core verwendet.
 
-[Installieren Sie EF Core CLI](https://learn.microsoft.com/en-us/ef/core/cli/dotnet)
-
-
 [Erste Schritte mit EF Core](https://learn.microsoft.com/en-us/ef/core/get-started/overview/first-app?tabs=netcore-cli)
+
+Bauen Sie die bestehende Applikation so um, dass sie EF Core verwendet.
 
 ### Teilaufgabe 1: Anfragen anpassen
 
