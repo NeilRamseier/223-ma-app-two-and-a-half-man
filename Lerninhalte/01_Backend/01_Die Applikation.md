@@ -53,11 +53,20 @@ Klasse «Ledger»: Steht für ein Konto.
 Analysieren Sie das Programm und beantworten Sie folgende Fragen:
 1. Wie wird verhindert, dass die Testdaten bei jedem Start wieder eingefügt
 werden?
+Durch das AppDbContext.cs file. Darin wird überprüft ob Daten für Ledger, User und Booking vorhanden sind.
+In dem DatabaseSeeder.cs File wird dann geschaut, ob es schon einen Context gibt, also ob schon Daten vorhanden sind.
 2. Recherchieren Sie, was ein HashSet und was ein ImmutableHashSet ist.
+HashSet:
+Eine veränderbare (mutable) Sammlung, die keine doppelten Elemente erlaubt und auf einer Hashing-Struktur basiert.  
+ImmutableHashSet:
+Eine unveränderbare (immutable) Version eines HashSets, die nach der Erstellung nicht mehr geändert werden kann.
 3. Welcher SQL-Befehl zählt alles Geld zusammen?
+SELECT SUM(balance) AS TotalBalance FROM {Ledger.CollectionName}
 4. Was bedeutet <<Property>>?
+Werden verwendet um Generische typen zu kenzeichnen
 5. Was bedeutet <<Readonly>>?
 6. (Schwer) Wieso wird nicht «double» für den Kontostand verwendet?
+Decimal hat 128-bit und kann somit die zahl viel genauer darstellen als double
 7. implementieren sie die Methode Book.
 
 
