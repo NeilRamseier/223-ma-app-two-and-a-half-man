@@ -11,14 +11,30 @@ public class LedgerRepository(IOptions<DatabaseSettings> databaseSettings) : ILe
 
     public void Book(decimal amount, Ledger from, Ledger to)
     {
+        this.LoadBalance(from);
         from.Balance -= amount;
-        Update(from);
+        this.Update(from);
         // Complicate calculations
         Thread.Sleep(250);
+        this.LoadBalance(to);
         to.Balance += amount;
-        Update(to);
+        this.Update(to);
     }
-    
+
+    public void LoadBalance(Ledger ledger)
+    {
+        const string query = $"SELECT balance FROM {Ledger.CollectionName} WHERE id=@Id";
+        using var conn = new MySqlConnection(_databaseSettings.ConnectionString);
+        conn.Open();
+        using var cmd = new MySqlCommand(query, conn);
+        cmd.Parameters.AddWithValue("@Id", ledger.Id);
+        var result = cmd.ExecuteScalar();
+        if (result != DBNull.Value)
+        {
+            ledger.Balance = Convert.ToDecimal(result);
+        }
+    }
+
     public decimal GetTotalMoney()
     {
         const string query = $"SELECT SUM(balance) AS TotalBalance FROM {Ledger.CollectionName}";
@@ -81,7 +97,7 @@ public class LedgerRepository(IOptions<DatabaseSettings> databaseSettings) : ILe
 
         return allLedgers;
     }
-    
+
     public Ledger? SelectOne(int id)
     {
         Ledger? retLedger = null;
@@ -142,7 +158,7 @@ public class LedgerRepository(IOptions<DatabaseSettings> databaseSettings) : ILe
         cmd.Parameters.AddWithValue("@Name", ledger.Name);
         cmd.Parameters.AddWithValue("@Balance", ledger.Balance);
         cmd.Parameters.AddWithValue("@Id", ledger.Id);
-        
+
         cmd.ExecuteNonQuery();
     }
 
@@ -152,7 +168,7 @@ public class LedgerRepository(IOptions<DatabaseSettings> databaseSettings) : ILe
         conn.Open();
         Update(ledger, conn, null);
     }
-    
+
     public decimal? GetBalance(int ledgerId, MySqlConnection conn, MySqlTransaction transaction)
     {
         const string query = "SELECT balance FROM ledgers WHERE id=@Id";
