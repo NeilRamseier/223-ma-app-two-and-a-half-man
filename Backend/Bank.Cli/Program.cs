@@ -64,7 +64,7 @@ Console.WriteLine();
 Console.WriteLine("Getting total money in system at the start.");
 try
 {
-    var startMoney = ledgerRepository.GetTotalMoney();
+    var startMoney = await ledgerRepository.GetTotalMoney();
     Console.WriteLine($"Total start money: {startMoney}");
 }
 catch (Exception ex)

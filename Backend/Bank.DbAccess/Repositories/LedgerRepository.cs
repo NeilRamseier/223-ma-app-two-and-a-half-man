@@ -32,12 +32,13 @@ public class LedgerRepository : ILedgerRepository
 
     public async Task<decimal> GetTotalMoney()
     {
-        await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+        await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
         try
         {
             var totalMoney = await _context.Ledgers.SumAsync(ledger => ledger.Balance);
             await transaction.CommitAsync();
-            return Convert.ToDecimal(totalMoney);
+            return totalMoney
+                ;
         }
         catch
         {
