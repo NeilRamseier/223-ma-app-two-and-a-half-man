@@ -1,5 +1,9 @@
-﻿using Bank.DbAccess.Data;
+﻿using System.Data;
+using System.Runtime.CompilerServices;
+using Bank.DbAccess.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using MySqlConnector;
 
 namespace Bank.DbAccess.Repositories;
 
@@ -7,18 +11,62 @@ public class BookingRepository(IOptions<DatabaseSettings> settings, AppDbContext
 {
     private DatabaseSettings _settings = settings.Value;
 
-    public bool Book(int sourceLedgerId, int destinationLKedgerId, decimal amount)
+    private readonly AppDbContext _context = context;
+
+    private LedgerRepository _ledgerRepository;
+
+
+    public async Task<bool> Book(int sourceLedgerId, int destinationLKedgerId, decimal amount)
     {
-        // Machen Sie eine Connection und eine Transaktion
+        bool repeatTransaction = true;
+        int repeatCounter = 0;
+        bool result = false;
 
-        // In der Transaktion:
+        await using var conn = new MySqlConnection(_settings.ConnectionString);
+        await conn.OpenAsync();
+        while (repeatTransaction)
+        {
 
-        // Schauen Sie ob genügend Geld beim Spender da ist
-        // Führen Sie die Buchung durch und UPDATEn Sie die ledgers
-        // Beenden Sie die Transaktion
-        // Bei einem Transaktionsproblem: Restarten Sie die Transaktion in einer Schleife 
-        // (Siehe LedgersModel.SelectOne)
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
 
-        return false; // Lösch mich
+            var from = _context.Ledgers.FirstOrDefault(x => x.Id == sourceLedgerId);
+            var to = _context.Ledgers.FirstOrDefault(x => x.Id == destinationLKedgerId);
+
+            if (from == null || to == null)
+            {
+                result = false;
+            }
+            else
+            {
+                var possibleBalance = from.Balance -= amount;
+                if (possibleBalance >= 0)
+                {
+                    from.Balance -= amount;
+                    await _ledgerRepository.Update(from);
+                    Thread.Sleep(250);
+                    await _ledgerRepository.LoadBalance(to);
+                    to.Balance += amount;
+                    await _ledgerRepository.Update(to);
+                    try
+                    {
+                        repeatTransaction = false;
+                        result = true;
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception e)
+                    {
+                        await transaction.RollbackAsync();
+                        repeatCounter++;
+                        throw;
+                    }
+                }
+
+                {
+                    result = false;
+                }
+            }
+        }
+        return result;
     }
 }
