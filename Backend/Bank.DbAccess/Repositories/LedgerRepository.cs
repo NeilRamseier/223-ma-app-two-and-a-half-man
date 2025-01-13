@@ -157,4 +157,16 @@ public class LedgerRepository : ILedgerRepository
             throw;
         }
     }
+
+    public async Task Delete(int id)
+    {
+        var ledger = await _context.Ledgers.FirstOrDefaultAsync(u => u.Id == id);
+        if (ledger == null)
+        {
+            throw new KeyNotFoundException($"No Ledger with id {id}");
+        }
+
+        _context.Ledgers.Remove(ledger);
+        await _context.SaveChangesAsync();
+    }
 }
