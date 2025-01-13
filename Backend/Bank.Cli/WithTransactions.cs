@@ -5,7 +5,7 @@ namespace Bank.Cli;
 
 public static class WithTransactions
 {
-    public static void Run(IEnumerable<Ledger> ledgers, ILedgerRepository ledgerRepository)
+    public static async void Run(IEnumerable<Ledger> ledgers, ILedgerRepository ledgerRepository)
     {
         ////////////////////
         // Your Code Here
@@ -32,7 +32,7 @@ public static class WithTransactions
         Console.WriteLine("Getting total money in system at the end.");
         try
         {
-            var endMoney = ledgerRepository.GetTotalMoney();
+            var endMoney = await ledgerRepository.GetTotalMoney();
             Console.WriteLine($"Total end money: {endMoney}");
         }
         catch (Exception ex)
