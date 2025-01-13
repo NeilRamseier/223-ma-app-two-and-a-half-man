@@ -32,7 +32,7 @@ public static class WithTransactions
         Console.WriteLine("Getting total money in system at the end.");
         try
         {
-            decimal endMoney = ledgerRepository.GetTotalMoney();
+            var endMoney = ledgerRepository.GetTotalMoney();
             Console.WriteLine($"Total end money: {endMoney}");
         }
         catch (Exception ex)
