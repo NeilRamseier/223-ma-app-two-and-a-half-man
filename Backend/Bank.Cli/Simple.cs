@@ -10,27 +10,28 @@ public static class Simple
         // Your Code Here
         ////////////////////
 
-        Console.WriteLine("Booking, press ESC to stop.");
+        /* Console.WriteLine("Booking, press ESC to stop.");
 
-        var ledgerArray = ledgerRepository.GetAllLedgers().ToArray();
+         var ledgerArray = ledgerRepository.GetAllLedgers();
 
-        var random = new Random();
-        while (!Console.KeyAvailable || Console.ReadKey(true).Key != ConsoleKey.Escape)
-        {
-            var from = ledgerArray[random.Next(ledgerArray.Length)];
-            var to = ledgerArray[random.Next(ledgerArray.Length)];
+         var random = new Random();
+         while (!Console.KeyAvailable || Console.ReadKey(true).Key != ConsoleKey.Escape)
+         {
+             var from = ledgerArray[random.Next(ledgerArray.Length)];
+             var to = ledgerArray[random.Next(ledgerArray.Length)];
 
-            while (to == from) to = ledgerArray[random.Next(ledgerArray.Length)];
+             while (to == from) to = ledgerArray[random.Next(ledgerArray.Length)];
 
 
-            var amount = random.Next(1, 101);
+             var amount = random.Next(1, 101);
 
-            ledgerRepository.Book(amount, from, to);
+             ledgerRepository.Book(amount, from, to);
 
-            Console.Write(".");
+             Console.Write(".");
 
-            Thread.Sleep(100);
-        }
+             Thread.Sleep(100);
+         }
+         */
 
         Console.WriteLine();
         Console.WriteLine("Getting total money in system at the end.");

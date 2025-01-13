@@ -5,7 +5,7 @@ namespace Bank.DbAccess.Repositories;
 
 public interface ILedgerRepository
 {
-    IEnumerable<Ledger> GetAllLedgers();
+    Task<IEnumerable<Ledger>> GetAllLedgers();
     public void Book(decimal amount, Ledger from, Ledger to);
     public void LoadBalance(Ledger ledger);
     decimal GetTotalMoney();

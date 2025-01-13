@@ -1,38 +1,33 @@
 using System.Data;
 using Bank.Core.Models;
+using Bank.DbAccess.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
 
 namespace Bank.DbAccess.Repositories;
 
-public class LedgerRepository(IOptions<DatabaseSettings> databaseSettings) : ILedgerRepository
+public class LedgerRepository : ILedgerRepository
 {
-    private readonly DatabaseSettings _databaseSettings = databaseSettings.Value;
+    private readonly DatabaseSettings _databaseSettings;
+
+    private readonly AppDbContext _context;
+
+    public LedgerRepository(IOptions<DatabaseSettings> databaseSettings, AppDbContext context)
+    {
+        this._context = context;
+        this._databaseSettings = databaseSettings.Value;
+    }
 
     public void Book(decimal amount, Ledger from, Ledger to)
     {
         this.LoadBalance(from);
         from.Balance -= amount;
         this.Update(from);
-        // Complicate calculations
         Thread.Sleep(250);
         this.LoadBalance(to);
         to.Balance += amount;
         this.Update(to);
-    }
-
-    public void LoadBalance(Ledger ledger)
-    {
-        const string query = $"SELECT balance FROM {Ledger.CollectionName} WHERE id=@Id";
-        using var conn = new MySqlConnection(_databaseSettings.ConnectionString);
-        conn.Open();
-        using var cmd = new MySqlCommand(query, conn);
-        cmd.Parameters.AddWithValue("@Id", ledger.Id);
-        var result = cmd.ExecuteScalar();
-        if (result != DBNull.Value)
-        {
-            ledger.Balance = Convert.ToDecimal(result);
-        }
     }
 
     public decimal GetTotalMoney()
@@ -52,51 +47,36 @@ public class LedgerRepository(IOptions<DatabaseSettings> databaseSettings) : ILe
         return totalBalance;
     }
 
-    public IEnumerable<Ledger> GetAllLedgers()
+    public async Task<IEnumerable<Ledger>> GetAllLedgers()
     {
-        var allLedgers = new List<Ledger>();
-
-        const string query = $"SELECT id, name, balance FROM {Ledger.CollectionName} ORDER BY name";
-        bool worked;
-        do
+        await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+        try
         {
-            worked = true;
-            using var conn = new MySqlConnection(_databaseSettings.ConnectionString);
-            conn.Open();
-            using var transaction = conn.BeginTransaction(IsolationLevel.Serializable);
-            try
-            {
-                using var cmd = new MySqlCommand(query, conn, transaction);
-                using var reader = cmd.ExecuteReader();
-                while (reader.Read())
-                {
-                    var id = reader.GetInt32(reader.GetOrdinal("id"));
-                    var name = reader.GetString(reader.GetOrdinal("name"));
-                    var balance = reader.GetDecimal(reader.GetOrdinal("balance"));
-
-                    allLedgers.Add(new Ledger { Id = id, Name = name, Balance = balance });
-                }
-            }
-            catch (Exception ex)
-            {
-                // Attempt to roll back the transaction.
-                try
-                {
-                    transaction.Rollback();
-                    if (ex.GetType() != typeof(Exception))
-                        worked = false;
-                }
-                catch (Exception ex2)
-                {
-                    // Handle any errors that may have occurred on the server that would cause the rollback to fail.
-                    if (ex2.GetType() != typeof(Exception))
-                        worked = false;
-                }
-            }
-        } while (!worked);
-
-        return allLedgers;
+            var allLedgers = await _context.Ledgers.OrderBy(ledger => ledger.Name).ToListAsync();
+            await transaction.CommitAsync();
+            return allLedgers;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
+
+    public void LoadBalance(Ledger ledger)
+    {
+        const string query = $"SELECT balance FROM {Ledger.CollectionName} WHERE id=@Id";
+        using var conn = new MySqlConnection(_databaseSettings.ConnectionString);
+        conn.Open();
+        using var cmd = new MySqlCommand(query, conn);
+        cmd.Parameters.AddWithValue("@Id", ledger.Id);
+        var result = cmd.ExecuteScalar();
+        if (result != DBNull.Value)
+        {
+            ledger.Balance = Convert.ToDecimal(result);
+        }
+    }
+
 
     public Ledger? SelectOne(int id)
     {
