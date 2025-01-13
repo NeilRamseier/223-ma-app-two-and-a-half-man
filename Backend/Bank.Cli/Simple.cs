@@ -25,7 +25,7 @@ public static class Simple
 
             var amount = random.Next(1, 101);
 
-            ledgerRepository.Book(amount, from, to);
+           // ledgerRepository.Book(amount, from, to, conn, transaction);
 
             Console.Write(".");
 

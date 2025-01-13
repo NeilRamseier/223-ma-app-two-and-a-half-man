@@ -71,6 +71,4 @@ catch (Exception ex)
     Console.WriteLine(ex.Message);
 }
 
-Simple.Run(ledgerRepository);
-
-// WithTransactions.Run(allLedgers, ledgerRepository);
+WithTransactions.Run(allLedgers, ledgerRepository, dbSettings);

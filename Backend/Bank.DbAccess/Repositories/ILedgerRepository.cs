@@ -6,8 +6,8 @@ namespace Bank.DbAccess.Repositories;
 public interface ILedgerRepository
 {
     IEnumerable<Ledger> GetAllLedgers();
-    public void Book(decimal amount, Ledger from, Ledger to);
-    public void LoadBalance(Ledger ledger);
+    string Book(decimal amount, Ledger from, Ledger to, MySqlConnection conn, MySqlTransaction transaction);
+    //public void LoadBalance(Ledger ledger);
     decimal GetTotalMoney();
     Ledger? SelectOne(int id);
     Ledger? SelectOne(int id, MySqlConnection conn, MySqlTransaction? transaction);
