@@ -31,4 +31,11 @@ public class LedgersController(ILedgerRepository ledgerRepository) : ControllerB
     {
         ledgerRepository.Update(ledger);
     }
+    
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Administrators")]
+    public async Task Delete(int id)
+    {
+        await ledgerRepository.Delete(id);
+    }
 }
