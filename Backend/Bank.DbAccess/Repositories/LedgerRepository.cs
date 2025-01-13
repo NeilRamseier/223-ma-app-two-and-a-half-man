@@ -30,21 +30,20 @@ public class LedgerRepository : ILedgerRepository
         this.Update(to);
     }
 
-    public decimal GetTotalMoney()
+    public async Task<decimal> GetTotalMoney()
     {
-        const string query = $"SELECT SUM(balance) AS TotalBalance FROM {Ledger.CollectionName}";
-        decimal totalBalance = 0;
-
-        using var conn = new MySqlConnection(_databaseSettings.ConnectionString);
-        conn.Open();
-        using var cmd = new MySqlCommand(query, conn);
-        var result = cmd.ExecuteScalar();
-        if (result != DBNull.Value)
+        await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+        try
         {
-            totalBalance = Convert.ToDecimal(result);
+            var totalMoney = await _context.Ledgers.OrderBy(ledger => ledger.Balance).CountAsync();
+            await transaction.CommitAsync();
+            return Convert.ToDecimal(totalMoney);
         }
-
-        return totalBalance;
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<IEnumerable<Ledger>> GetAllLedgers()
@@ -63,17 +62,18 @@ public class LedgerRepository : ILedgerRepository
         }
     }
 
-    public void LoadBalance(Ledger ledger)
-    {
-        const string query = $"SELECT balance FROM {Ledger.CollectionName} WHERE id=@Id";
-        using var conn = new MySqlConnection(_databaseSettings.ConnectionString);
-        conn.Open();
-        using var cmd = new MySqlCommand(query, conn);
-        cmd.Parameters.AddWithValue("@Id", ledger.Id);
-        var result = cmd.ExecuteScalar();
-        if (result != DBNull.Value)
+    public async Task LoadBalance(Ledger ledger)
+    {    
+        await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+        try
         {
-            ledger.Balance = Convert.ToDecimal(result);
+            var existingLedger = await _context.Ledgers.FirstOrDefaultAsync(l => l.Id == ledger.Id);
+            ledger.Balance = existingLedger?.Balance ?? 0;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
         }
     }
 
