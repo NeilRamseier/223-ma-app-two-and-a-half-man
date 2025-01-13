@@ -63,7 +63,7 @@ public class LedgerRepository : ILedgerRepository
     }
 
     public async Task LoadBalance(Ledger ledger)
-    {    
+    {
         await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
         try
         {
@@ -109,7 +109,7 @@ public class LedgerRepository : ILedgerRepository
         }
     }
 
-    public async void Update(Ledger ledger, MySqlConnection conn, MySqlTransaction? transaction)
+    public async Task Update(Ledger ledger, MySqlConnection conn, MySqlTransaction? transaction)
     {
         try
         {

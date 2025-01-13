@@ -11,7 +11,7 @@ public interface ILedgerRepository
     Task<decimal> GetTotalMoney();
     Task<Ledger?> SelectOne(int id);
     Task<Ledger?> SelectOne(int id, MySqlConnection conn, MySqlTransaction? transaction);
-    void Update(Ledger ledger, MySqlConnection conn, MySqlTransaction transaction);
+    Task Update(Ledger ledger, MySqlConnection conn, MySqlTransaction transaction);
     void Update(Ledger ledger);
-    decimal? GetBalance(int ledgerId, MySqlConnection conn, MySqlTransaction transaction);
+    Task<decimal?> GetBalance(int ledgerId, MySqlConnection conn, MySqlTransaction transaction);
 }
