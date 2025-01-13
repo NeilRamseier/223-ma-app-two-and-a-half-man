@@ -11,7 +11,7 @@ public class LedgersController(ILedgerRepository ledgerRepository) : ControllerB
 {
     [HttpGet]
     [Authorize(Roles = "Administrators,Users")]
-    public IEnumerable<Ledger> Get()
+    public Task<IEnumerable<Ledger>> Get()
     {
         var allLedgers = ledgerRepository.GetAllLedgers();
         return allLedgers;
@@ -19,7 +19,7 @@ public class LedgersController(ILedgerRepository ledgerRepository) : ControllerB
 
     [HttpGet("{id:int}")]
     [Authorize(Roles = "Administrators,Users")]
-    public Ledger? Get(int id)
+    public Task<Ledger?> Get(int id)
     {
         var ledger = ledgerRepository.SelectOne(id);
         return ledger;
