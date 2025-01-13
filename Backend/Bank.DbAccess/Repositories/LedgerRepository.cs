@@ -35,7 +35,7 @@ public class LedgerRepository : ILedgerRepository
         await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
         try
         {
-            var totalMoney = await _context.Ledgers.OrderBy(ledger => ledger.Balance).CountAsync();
+            var totalMoney = await _context.Ledgers.SumAsync(ledger => ledger.Balance);
             await transaction.CommitAsync();
             return Convert.ToDecimal(totalMoney);
         }
@@ -64,7 +64,7 @@ public class LedgerRepository : ILedgerRepository
 
     public async Task LoadBalance(Ledger ledger)
     {
-        await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+        await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
         try
         {
             var existingLedger = await _context.Ledgers.FirstOrDefaultAsync(l => l.Id == ledger.Id);
@@ -94,7 +94,7 @@ public class LedgerRepository : ILedgerRepository
         }
     }
 
-    public async Task<Ledger?> SelectOne(int id, MySqlConnection conn, MySqlTransaction? transaction)
+    public async Task<Ledger?> SelectOne(int id, MySqlTransaction? transaction)
     {
         try
         {
@@ -109,11 +109,21 @@ public class LedgerRepository : ILedgerRepository
         }
     }
 
-    public async Task Update(Ledger ledger, MySqlConnection conn, MySqlTransaction? transaction)
+    public async Task Update(Ledger ledger, MySqlTransaction transaction)
     {
+        if (transaction == null)
+        {
+            throw new ArgumentNullException(nameof(transaction));
+        }
+
         try
         {
-            _context.Ledgers.Add(new Ledger { Id = ledger.Id, Name = ledger.Name, Balance = ledger.Balance });
+            if (!_context.Ledgers.Any(l => l.Id == ledger.Id))
+            {
+                throw new Exception($"Ledger {ledger.Id} not found");
+            }
+
+            _context.Ledgers.Update(ledger);
             await transaction.CommitAsync();
         }
         catch
@@ -123,26 +133,22 @@ public class LedgerRepository : ILedgerRepository
         }
     }
 
-    public void Update(Ledger ledger)
+    public async Task Update(Ledger ledger)
     {
+        await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+
         using var conn = new MySqlConnection(_databaseSettings.ConnectionString);
         conn.Open();
-        Update(ledger, conn, null);
+        await Update(ledger, null);
     }
 
-    public async Task<decimal?> GetBalance(int ledgerId, MySqlConnection conn, MySqlTransaction transaction)
+    public async Task<decimal?> GetBalance(int ledgerId, MySqlTransaction transaction)
     {
         try
         {
-            var ledgers = await _context.Ledgers.OrderBy(ledger => ledgerId).ToListAsync();
-            decimal balance = 0;
-            foreach (var ledger in ledgers)
-            {
-                balance = ledger.Balance;
-            }
-
+            var ledger = await this.SelectOne(ledgerId, transaction);
             await transaction.CommitAsync();
-            return balance;
+            return ledger?.Balance;
         }
         catch
         {

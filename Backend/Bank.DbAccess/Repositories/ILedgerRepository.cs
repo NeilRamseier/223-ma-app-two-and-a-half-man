@@ -10,8 +10,8 @@ public interface ILedgerRepository
     public Task LoadBalance(Ledger ledger);
     Task<decimal> GetTotalMoney();
     Task<Ledger?> SelectOne(int id);
-    Task<Ledger?> SelectOne(int id, MySqlConnection conn, MySqlTransaction? transaction);
-    Task Update(Ledger ledger, MySqlConnection conn, MySqlTransaction transaction);
-    void Update(Ledger ledger);
-    Task<decimal?> GetBalance(int ledgerId, MySqlConnection conn, MySqlTransaction transaction);
+    Task<Ledger?> SelectOne(int id, MySqlTransaction? transaction);
+    Task Update(Ledger ledger, MySqlTransaction transaction);
+    Task Update(Ledger ledger);
+    Task<decimal?> GetBalance(int ledgerId, MySqlTransaction transaction);
 }
