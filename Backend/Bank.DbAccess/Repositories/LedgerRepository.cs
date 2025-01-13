@@ -78,68 +78,49 @@ public class LedgerRepository : ILedgerRepository
     }
 
 
-    public Ledger? SelectOne(int id)
+    public async Task<Ledger?> SelectOne(int id)
     {
-        Ledger? retLedger = null;
-        bool worked;
-
-        do
+        await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+        try
         {
-            worked = true;
-            using var conn = new MySqlConnection(_databaseSettings.ConnectionString);
-            conn.Open();
-            using var transaction = conn.BeginTransaction(IsolationLevel.Serializable);
-            try
-            {
-                retLedger = SelectOne(id, conn, transaction);
-            }
-            catch (Exception ex)
-            {
-                // Attempt to roll back the transaction.
-                try
-                {
-                    transaction.Rollback();
-                    if (ex.GetType() != typeof(Exception))
-                        worked = false;
-                }
-                catch (Exception ex2)
-                {
-                    // Handle any errors that may have occurred on the server that would cause the rollback to fail.
-                    if (ex2.GetType() != typeof(Exception))
-                        worked = false;
-                }
-            }
-        } while (!worked);
-
-        return retLedger;
+            var ledger = await _context.Ledgers.FirstOrDefaultAsync(l => l.Id == id);
+            await transaction.CommitAsync();
+            return ledger;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
-    public Ledger SelectOne(int id, MySqlConnection conn, MySqlTransaction? transaction)
+    public async Task<Ledger?> SelectOne(int id, MySqlConnection conn, MySqlTransaction? transaction)
     {
-        const string query = $"SELECT id, name, balance FROM {Ledger.CollectionName} WHERE id=@Id";
-
-        using var cmd = new MySqlCommand(query, conn, transaction);
-        cmd.Parameters.AddWithValue("@Id", id);
-        using var reader = cmd.ExecuteReader();
-        if (!reader.Read())
-            throw new Exception($"No Ledger with id {id}");
-
-        var ordId = reader.GetInt32(reader.GetOrdinal("id"));
-        var ordName = reader.GetString(reader.GetOrdinal("name"));
-        var ordBalance = reader.GetDecimal(reader.GetOrdinal("balance"));
-
-        return new Ledger { Id = ordId, Name = ordName, Balance = ordBalance };
+        try
+        {
+            var ledger = await _context.Ledgers.FirstOrDefaultAsync(l => l.Id == id);
+            await transaction.CommitAsync();
+            return ledger;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
-    public void Update(Ledger ledger, MySqlConnection conn, MySqlTransaction? transaction)
+    public async void Update(Ledger ledger, MySqlConnection conn, MySqlTransaction? transaction)
     {
-        const string query = $"UPDATE {Ledger.CollectionName} SET name=@Name, balance=@Balance WHERE id=@Id";
-        using var cmd = new MySqlCommand(query, conn, transaction);
-        cmd.Parameters.AddWithValue("@Name", ledger.Name);
-        cmd.Parameters.AddWithValue("@Balance", ledger.Balance);
-        cmd.Parameters.AddWithValue("@Id", ledger.Id);
-
-        cmd.ExecuteNonQuery();
+        try
+        {
+            _context.Ledgers.Add(new Ledger { Id = ledger.Id, Name = ledger.Name, Balance = ledger.Balance });
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public void Update(Ledger ledger)
@@ -149,18 +130,24 @@ public class LedgerRepository : ILedgerRepository
         Update(ledger, conn, null);
     }
 
-    public decimal? GetBalance(int ledgerId, MySqlConnection conn, MySqlTransaction transaction)
+    public async Task<decimal?> GetBalance(int ledgerId, MySqlConnection conn, MySqlTransaction transaction)
     {
-        const string query = "SELECT balance FROM ledgers WHERE id=@Id";
-
-        using var cmd = new MySqlCommand(query, conn, transaction);
-        cmd.Parameters.AddWithValue("@Id", ledgerId);
-        var result = cmd.ExecuteScalar();
-        if (result != DBNull.Value)
+        try
         {
-            return Convert.ToDecimal(result);
-        }
+            var ledgers = await _context.Ledgers.OrderBy(ledger => ledgerId).ToListAsync();
+            decimal balance = 0;
+            foreach (var ledger in ledgers)
+            {
+                balance = ledger.Balance;
+            }
 
-        return null;
+            await transaction.CommitAsync();
+            return balance;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 }
