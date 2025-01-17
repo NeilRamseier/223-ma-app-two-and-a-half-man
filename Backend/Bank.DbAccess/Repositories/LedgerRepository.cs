@@ -160,13 +160,23 @@ public class LedgerRepository : ILedgerRepository
 
     public async Task Delete(int id)
     {
-        var ledger = await _context.Ledgers.FirstOrDefaultAsync(u => u.Id == id);
-        if (ledger == null)
-        {
-            throw new KeyNotFoundException($"No Ledger with id {id}");
-        }
+        await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
 
-        _context.Ledgers.Remove(ledger);
-        await _context.SaveChangesAsync();
+        try
+        {
+            var ledger = await _context.Ledgers.FirstOrDefaultAsync(u => u.Id == id);
+            if (ledger == null)
+            {
+                throw new KeyNotFoundException($"No Ledger with id {id}");
+            }
+
+            _context.Ledgers.Remove(ledger);
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 }
