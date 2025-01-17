@@ -32,14 +32,4 @@ export class LedgerService {
         };
         return this.http.post(`${this.apiUrl}/ledgers/transfer`, payload);
     }
-
-    isAuthorized() {
-        const token = this.authService.getToken();
-        if(token) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
 }

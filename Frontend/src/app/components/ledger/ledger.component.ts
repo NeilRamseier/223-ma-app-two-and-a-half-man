@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
     selector: 'app-ledger',
@@ -21,7 +22,7 @@ export class LedgerComponent implements OnInit {
     isEnabled: boolean = false;
 
     constructor(private ledgerService: LedgerService,
-        private router: Router
+        private router: Router, private authService: AuthService
     ) {}
 
     ngOnInit(): void {
@@ -30,7 +31,7 @@ export class LedgerComponent implements OnInit {
     }
 
     checkAuthorization(): void {
-        let authorized = this.ledgerService.isAuthorized();
+        let authorized = this.authService.isLoggedIn();
         if(authorized){
             this.isEnabled = true;
         } else {
