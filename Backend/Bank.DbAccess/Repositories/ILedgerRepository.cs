@@ -16,4 +16,5 @@ public interface ILedgerRepository
     Task Update(Ledger ledger);
     Task Delete(int id);
     Task<decimal?> GetBalance(int ledgerId, IDbContextTransaction transaction);
+    Task<Ledger?> Create(Ledger ledger);
 }
