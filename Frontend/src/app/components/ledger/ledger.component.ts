@@ -18,6 +18,7 @@ export class LedgerComponent implements OnInit {
     toLedgerId: number | null = null;
     amount: number | null = null;
     transferMessage = '';
+    isEnabled: boolean = false;
 
     constructor(private ledgerService: LedgerService,
         private router: Router
@@ -25,6 +26,16 @@ export class LedgerComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadLedgers();
+        this.checkAuthorization();
+    }
+
+    checkAuthorization(): void {
+        let authorized = this.ledgerService.isAuthorized();
+        if(authorized){
+            this.isEnabled = true;
+        } else {
+            this.isEnabled = false;
+        }
     }
 
     loadLedgers(): void {
