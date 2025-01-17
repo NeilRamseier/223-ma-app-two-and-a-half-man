@@ -2,6 +2,7 @@ using System.Data;
 using Bank.Core.Models;
 using Bank.DbAccess.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
 
@@ -65,17 +66,8 @@ public class LedgerRepository : ILedgerRepository
 
     public async Task LoadBalance(Ledger ledger)
     {
-        await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
-        try
-        {
             var existingLedger = await _context.Ledgers.FirstOrDefaultAsync(l => l.Id == ledger.Id);
             ledger.Balance = existingLedger?.Balance ?? 0;
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
     }
 
 
@@ -95,7 +87,7 @@ public class LedgerRepository : ILedgerRepository
         }
     }
 
-    public async Task<Ledger?> SelectOne(int id, MySqlTransaction? transaction)
+    public async Task<Ledger?> SelectOne(int id, IDbContextTransaction? transaction)
     {
         try
         {
@@ -110,7 +102,7 @@ public class LedgerRepository : ILedgerRepository
         }
     }
 
-    public async Task Update(Ledger ledger, MySqlTransaction transaction)
+    public async Task Update(Ledger ledger, IDbContextTransaction transaction)
     {
         if (transaction == null)
         {
@@ -143,7 +135,7 @@ public class LedgerRepository : ILedgerRepository
         await Update(ledger, null);
     }
 
-    public async Task<decimal?> GetBalance(int ledgerId, MySqlTransaction transaction)
+    public async Task<decimal?> GetBalance(int ledgerId, IDbContextTransaction transaction)
     {
         try
         {

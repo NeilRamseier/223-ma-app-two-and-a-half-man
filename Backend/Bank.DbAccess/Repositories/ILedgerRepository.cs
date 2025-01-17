@@ -1,4 +1,5 @@
 using Bank.Core.Models;
+using Microsoft.EntityFrameworkCore.Storage;
 using MySqlConnector;
 
 namespace Bank.DbAccess.Repositories;
@@ -10,9 +11,9 @@ public interface ILedgerRepository
     public Task LoadBalance(Ledger ledger);
     Task<decimal> GetTotalMoney();
     Task<Ledger?> SelectOne(int id);
-    Task<Ledger?> SelectOne(int id, MySqlTransaction? transaction);
-    Task Update(Ledger ledger, MySqlTransaction transaction);
+    Task<Ledger?> SelectOne(int id, IDbContextTransaction? transaction);
+    Task Update(Ledger ledger, IDbContextTransaction transaction);
     Task Update(Ledger ledger);
     Task Delete(int id);
-    Task<decimal?> GetBalance(int ledgerId, MySqlTransaction transaction);
+    Task<decimal?> GetBalance(int ledgerId, IDbContextTransaction transaction);
 }

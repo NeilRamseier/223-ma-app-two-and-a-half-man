@@ -14,14 +14,16 @@ public class BookingsController(IBookingRepository bookingRepository) : Controll
     [Authorize(Roles = "Administrators")]
     public async Task<IActionResult> Post([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] Booking booking)
     {
-        return await Task.Run(() =>
-        {
-            IActionResult response = Ok();
-
-            // Rufe "Book" im "BookingRepository" auf.
-            // Noch besser wäre es, wenn du einen Service verwenden würdest, der die Geschäftslogik enthält.
-            // Gib je nach Erfolg OK() oder Conflict() zurück
+            IActionResult response;
+            try
+            {
+                await bookingRepository.Book(booking.SourceId, booking.DestinationId, booking.Amount);
+                response = Ok();
+            }
+            catch (Exception e)
+            {
+                response = Conflict();
+            }
             return response;
-        });
     }
 }
