@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+
+    <h1>New Booking</h1>
+
+    <form id="booking-form">
+        <div class="form-group">
+            <label for="fromId">From (ID):</label>
+            <input type="number" id="fromId">
+        </div>
+
+        <div class="form-group">
+            <label for="toId">To (ID):</label>
+            <input name="toId" [(ngModel)]="toId" type="number" id="toId">
+        </div>
+
+        <div class="form-group">
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" name="amount" min="0">
+        </div>
+
+        <button type="button" (click)="book()">Submit</button>
+        <button type="button" (click)="navigateToLedgers()">Back to Ledgers</button>
+
+
+
+        <p>
+            {{ message }}
+        </p>
+    </form>
+</body>
+</html>
