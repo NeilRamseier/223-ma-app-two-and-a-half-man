@@ -182,7 +182,7 @@ public class LedgerRepository : ILedgerRepository
         }
     }
 
-    public async Task<Ledger?> CreateNewLedger(Ledger ledger)
+    public async Task<Ledger?> Create(Ledger ledger)
     {
         await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
 

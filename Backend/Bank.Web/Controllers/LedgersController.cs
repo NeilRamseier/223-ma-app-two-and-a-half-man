@@ -41,8 +41,8 @@ public class LedgersController(ILedgerRepository ledgerRepository) : ControllerB
 
     [HttpPost]
     [Authorize(Roles = "Administrators")]
-    public async Task CreateLedger([FromBody] Ledger ledger)
+    public async Task Create([FromBody] Ledger ledger)
     {
-        await ledgerRepository.CreateNewLedger(ledger);
+        await ledgerRepository.Create(ledger);
     }
 }

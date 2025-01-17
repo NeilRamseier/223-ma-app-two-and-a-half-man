@@ -15,5 +15,5 @@ public interface ILedgerRepository
     Task Update(Ledger ledger);
     Task Delete(int id);
     Task<decimal?> GetBalance(int ledgerId, MySqlTransaction transaction);
-    Task<Ledger?> CreateNewLedger(Ledger ledger);
+    Task<Ledger?> Create(Ledger ledger);
 }
