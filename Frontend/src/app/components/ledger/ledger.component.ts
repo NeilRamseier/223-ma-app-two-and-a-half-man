@@ -4,6 +4,7 @@ import { Ledger } from '../../models/ledger.interface';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-ledger',
@@ -18,7 +19,9 @@ export class LedgerComponent implements OnInit {
     amount: number | null = null;
     transferMessage = '';
 
-    constructor(private ledgerService: LedgerService) {}
+    constructor(private ledgerService: LedgerService,
+        private router: Router
+    ) {}
 
     ngOnInit(): void {
         this.loadLedgers();
@@ -50,5 +53,9 @@ export class LedgerComponent implements OnInit {
         } else {
             this.transferMessage = 'Please fill in all fields with valid data.';
         }
+    }
+
+    navigateToBooking() : void {
+        void this.router.navigate(['/booking']);
     }
 }
