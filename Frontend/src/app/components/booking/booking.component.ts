@@ -11,29 +11,21 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './booking.component.css'
 })
 
-export class BookingComponent implements OnInit {
-  fromId: number | undefined;
-  toId: number | undefined;
+export class BookingComponent {
+  fromId: number | null = null;
+  toId: number | null = null;
+  amount: number | null = null;
 
       constructor(private bookingService: BookingService,
         private router: Router
       ) {}
-  ngOnInit(): void {
-    this.toId = 1;
-  }
 
     message = "";
 
     book(): void {
 
-      const fromIdElement = document.getElementById("fromId") as HTMLInputElement;
-      const amountElement = document.getElementById("amount") as HTMLInputElement;
-    
-      const fromId = parseInt(fromIdElement.value, 10);
-      const amount = parseFloat(amountElement.value);
-
-      if (fromId != null && this.toId != null && amount!= null){
-        this.bookingService.book(fromId, this.toId, amount).subscribe({
+      if (this.fromId != null && this.toId != null && this.amount!= null){
+        this.bookingService.book(this.fromId, this.toId, this.amount).subscribe({
           next: () => {
               this.message = "Booking successful!"
           },
