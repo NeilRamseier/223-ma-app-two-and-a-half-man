@@ -134,6 +134,7 @@ public class LedgerRepository : ILedgerRepository
         }
     }
 
+    //TODO Fehler noch beheben wird gegenseitig aufgerufen
     public async Task Update(Ledger ledger)
     {
         await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
@@ -173,7 +174,26 @@ public class LedgerRepository : ILedgerRepository
             _context.Ledgers.Remove(ledger);
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
-        }catch
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    public async Task<Ledger?> CreateNewLedger(Ledger ledger)
+    {
+        await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+
+        try
+        {
+            await _context.Ledgers.AddAsync(ledger);
+            //  await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return ledger;
+        }
+        catch
         {
             await transaction.RollbackAsync();
             throw;

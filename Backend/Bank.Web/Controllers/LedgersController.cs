@@ -31,11 +31,18 @@ public class LedgersController(ILedgerRepository ledgerRepository) : ControllerB
     {
         ledgerRepository.Update(ledger);
     }
-    
+
     [HttpDelete("{id:int}")]
     [Authorize(Roles = "Administrators")]
     public async Task Delete(int id)
     {
         await ledgerRepository.Delete(id);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Administrators")]
+    public async Task CreateLedger([FromBody] Ledger ledger)
+    {
+        await ledgerRepository.CreateNewLedger(ledger);
     }
 }
