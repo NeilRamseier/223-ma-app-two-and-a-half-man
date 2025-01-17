@@ -49,6 +49,16 @@ export class LedgerComponent implements OnInit {
             },
         });
     }
+    deleteLedger(ledgerId: number): void {
+        this.ledgerService.deleteLedger(ledgerId).subscribe({
+            next: () => {
+                this.loadLedgers();
+            },
+            error: (error) => {
+                console.error('Deletion error', error);
+            },
+        });
+    }
 
     makeTransfer(): void {
         if (this.fromLedgerId !== null && this.toLedgerId !== null && this.amount !== null && this.amount > 0) {

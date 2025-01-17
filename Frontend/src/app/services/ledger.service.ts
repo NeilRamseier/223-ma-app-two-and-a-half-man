@@ -24,6 +24,10 @@ export class LedgerService {
         return new Observable<Ledger[]>();
     }
 
+    deleteLedger(ledgerId: number){
+        return this.http.delete(`${this.apiUrl}/ledgers/${ledgerId}`)
+    }
+
     transferFunds(fromLedgerId: number, toLedgerId: number, amount: number): Observable<unknown> {
         const payload = {
             fromLedgerId,
