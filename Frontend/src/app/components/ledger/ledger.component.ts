@@ -80,4 +80,9 @@ export class LedgerComponent implements OnInit {
     navigateToBooking() : void {
         void this.router.navigate(['/booking']);
     }
+
+    navigateToCreate(): void {
+        void this.router.navigate(['/create' ])
+    }
+
 }

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+
+    <h1>New Ledger</h1>
+
+    <div class="form-group">
+        <label for="fromId">ID:</label>
+        <input name="fromId" [(ngModel)]="fromId" type="number" id="fromId">
+    </div>
+
+    <div class="form-group">
+        <label for="name">Name:</label>
+        <input name="name" [(ngModel)]="name" type="string" id="name">
+    </div>
+
+    <div class="form-group">
+        <label for="balance">Balance:</label>
+        <input name="balance" [(ngModel)]="balance" type="number" id="balance">
+    </div>
+
+    <button (click)="create()">Create Ledger</button>
+    <button (click)="navigateToLedgers()">Back to ledgers</button>
+
+    <p>
+        {{ message }}
+    </p>
+</body>
+</html>

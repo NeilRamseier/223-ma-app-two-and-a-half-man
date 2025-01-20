@@ -66,8 +66,8 @@ public class LedgerRepository : ILedgerRepository
 
     public async Task LoadBalance(Ledger ledger)
     {
-            var existingLedger = await _context.Ledgers.FirstOrDefaultAsync(l => l.Id == ledger.Id);
-            ledger.Balance = existingLedger?.Balance ?? 0;
+        var existingLedger = await _context.Ledgers.FirstOrDefaultAsync(l => l.Id == ledger.Id);
+        ledger.Balance = existingLedger?.Balance ?? 0;
     }
 
 
@@ -181,7 +181,7 @@ public class LedgerRepository : ILedgerRepository
         try
         {
             await _context.Ledgers.AddAsync(ledger);
-            //  await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             await transaction.CommitAsync();
             return ledger;
         }
