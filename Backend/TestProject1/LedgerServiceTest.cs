@@ -17,13 +17,12 @@ public class LedgerRepositoryTests
     {
         _options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            // don't raise the error warning us that the in memory db doesn't support transactions
             .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
 
         var databaseSettings = new DatabaseSettings
         {
-            ConnectionString = "FakeConnectionString"  // Mocked connection string
+            ConnectionString = "FakeConnectionString" 
         };
 
         _mockOptions = new Mock<IOptions<DatabaseSettings>>();
@@ -42,7 +41,7 @@ public class LedgerRepositoryTests
         await repository.Delete(1);
 
         var result = await context.Ledgers.FindAsync(1);
-        Assert.Null(result);  // The ledger should be removed
+        Assert.Null(result);
     }
 
     [Fact]
@@ -50,10 +49,7 @@ public class LedgerRepositoryTests
     {
         using var context = new AppDbContext(_options); 
         var repository = new LedgerRepository(_mockOptions.Object, context);
-        await Console.Out.WriteLineAsync("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
         var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() => repository.Delete(999));
-        await Console.Out.WriteLineAsync("LJSDKJFLSAJDFÖJSADFÖKJSAÖDLJFÖLAKJSDÖLFJSÖLAJFÖLDSKJAF");
-        await Console.Out.WriteLineAsync(exception.Message);
         Assert.Equal("No Ledger with id 999", exception.Message);
     }
     [Fact]
@@ -65,10 +61,10 @@ public class LedgerRepositoryTests
         context.Ledgers.Add(ledger);
         await context.SaveChangesAsync();
 
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => repository.Delete(99));  // Nonexistent ID
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => repository.Delete(99));
 
         var existingLedger = await context.Ledgers.FindAsync(2);
-        Assert.NotNull(existingLedger);  // Ledger still exists
+        Assert.NotNull(existingLedger);  
     }
 
 
