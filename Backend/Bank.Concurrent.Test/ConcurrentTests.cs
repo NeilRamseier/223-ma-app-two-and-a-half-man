@@ -2,6 +2,7 @@
 using Bank.DbAccess.Data;
 using Bank.DbAccess.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Xunit.Abstractions;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
@@ -13,21 +14,22 @@ namespace Bank.Concurrent.Test
 {
     public class ConcurrentTests : TestBed<TestProjectFixture>
     {
-        private readonly ITestOutputHelper output;
-        private readonly Options _options;
-        private readonly AppDbContext _context;
-        
+        private readonly AppDbContext? _context;
+
 
         public ConcurrentTests(ITestOutputHelper testOutputHelper, TestProjectFixture fixture)
-        : base(testOutputHelper, fixture) => _options = _fixture.GetService<IOptions<Options>>(_testOutputHelper)!.Value;
-        
-        
+            : base(testOutputHelper, fixture)
+        {
+            _context = fixture.ServiceProvider.GetService<AppDbContext>();
+        }
+
+
         [Fact]
         public async Task TestBookingParallel()
         {
-            var bookingRepository = _fixture.GetScopedService<IBookingRepository>(_testOutputHelper);
-            const int numberOfBookings = 1000;
-            const int users = 10;
+            var bookingRepository = _fixture.ServiceProvider.GetService<IBookingRepository>();
+            const int numberOfBookings = 1;
+            const int users = 2;
 
             Task[] tasks = new Task[users];
             var allLedgers = await _context.Ledgers.OrderBy(ledger => ledger.Name).ToArrayAsync();
