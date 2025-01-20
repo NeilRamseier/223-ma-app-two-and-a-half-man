@@ -10,7 +10,7 @@ Die Herausforderung für mich war es die Book Methode zu implementieren. Dabei g
 
 ### Neil
 Die grösste Herausforderung für mich war die Implementierung der API beim Lasttest, da ich anfangs nicht genau wusste, wie das funktioniert. Ich habe mich durch mehrere Dokumentationen gearbeitet, und als es schliesslich beim Login funktioniert hat, traten beim Ledger neue Probleme auf. Das machte es für mich zur grössten Herausforderung.
-Zusätzlich gab es ein Merge-Problem zwischen dem Projekt, LBank_Lasttest und dem Testprojekt 1. Ich habe längere Zeit versucht, dieses selbstständig durch das Auschecken früherer Commits und erneutes Zusammenführen zu lösen. Allerdings hat das nie geklappt, sodass unser ÜK-Leiter mir schliesslich helfen musste, das Problem zu beheben. Das Endresultat war ein funktionierender Lasttest, durch den wir sicherstellen können, dass die Applikation auch unter hoher Last funktioniert.
+Zusätzlich gab es ein Merge-Problem zwischen dem Projekt, LBank_Lasttest und dem Testprojekt 1. Ich habe längere Zeit versucht, dieses selbstständig durch das Auschecken früherer Commits und erneutes Zusammenführen zu lösen. Allerdings hat das nie geklappt, sodass unser ÜK-Leiter mir schliesslich helfen musste, das Problem zu beheben. Das Endresultat war ein funktionierender Lasttest, durch den wir sicherstellen können, ob die Applikation auch unter hoher Last funktioniert.
 
 # Tests und Testergebnisse
 
