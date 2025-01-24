@@ -11,7 +11,7 @@ public class ApiService
 
     public class LoginResponse
     {
-        public string Token { get; set; }
+        public string? Token { get; set; }
     }
 
     public async Task<List<Ledger>> GetLedgers(string jwt)
@@ -42,6 +42,6 @@ public class ApiService
         HttpResponseMessage response = await _client.PostAsJsonAsync(_apiUrl + "/login", user);
 
         var jwtToken = await response.Content.ReadFromJsonAsync<LoginResponse>();
-        return jwtToken.Token;
+        return jwtToken?.Token ?? throw new Exception();
     }
 }

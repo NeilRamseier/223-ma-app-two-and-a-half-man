@@ -1,25 +1,23 @@
 ﻿using System.Data;
-using System.Runtime.CompilerServices;
 using Bank.DbAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using MySqlConnector;
 
 namespace Bank.DbAccess.Repositories;
 
-public class BookingRepository(IOptions<DatabaseSettings> settings, AppDbContext context, ILedgerRepository ledgerRepository) : IBookingRepository
+public class BookingRepository(
+    IOptions<DatabaseSettings> settings,
+    AppDbContext context,
+    ILedgerRepository ledgerRepository) : IBookingRepository
 {
     private DatabaseSettings _settings = settings.Value;
 
     public async Task<bool> Book(int sourceLedgerId, int destinationLKedgerId, decimal amount)
     {
-        bool repeatTransaction = true;
-        int repeatCounter = 0;
-        bool result = false;
+        var repeatCounter = 0;
 
-        while (repeatTransaction)
+        while (repeatCounter++ < 1000)
         {
-
             await using var transaction =
                 await context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
 
@@ -28,38 +26,32 @@ public class BookingRepository(IOptions<DatabaseSettings> settings, AppDbContext
 
             if (from == null || to == null)
             {
-                result = false;
+                return false;
             }
-            else
-            {
-                var possibleBalance = from.Balance - amount;
-                if (possibleBalance >= 0)
-                {
-                    from.Balance -= amount;
-                    context.Ledgers.Update(from);
-                    Thread.Sleep(250);
-                    to.Balance += amount;
-                    context.Ledgers.Update(to);
-                    try
-                    {
-                        repeatTransaction = false;
-                        result = true;
-                        await context.SaveChangesAsync();
-                        await transaction.CommitAsync();
-                    }
-                    catch (Exception e)
-                    {
-                        await transaction.RollbackAsync();
-                        repeatCounter++;
-                        throw;
-                    }
-                }
 
-                {
-                    result = false;
-                }
+            var possibleBalance = from.Balance - amount;
+            if (possibleBalance < 0)
+            {
+                return false;
+            }
+
+            from.Balance -= amount;
+            context.Ledgers.Update(from);
+            Thread.Sleep(250);
+            to.Balance += amount;
+            context.Ledgers.Update(to);
+            try
+            {
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return true;
+            }
+            catch (Exception e)
+            {
+                await transaction.RollbackAsync();
             }
         }
-        return result;
+
+        return false;
     }
 }
