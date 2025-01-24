@@ -32,7 +32,8 @@ public class BookingRepository(IOptions<DatabaseSettings> settings, AppDbContext
             }
             else
             {
-                var possibleBalance = from.Balance - amount;
+                var fromBalance = from.Balance;
+                var possibleBalance = fromBalance - amount;
                 if (possibleBalance >= 0)
                 {
                     from.Balance -= amount;
@@ -57,6 +58,7 @@ public class BookingRepository(IOptions<DatabaseSettings> settings, AppDbContext
 
                 {
                     result = false;
+                    repeatTransaction = false;
                 }
             }
         }
