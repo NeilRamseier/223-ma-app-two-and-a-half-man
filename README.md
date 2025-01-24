@@ -15,10 +15,24 @@ Zusätzlich gab es ein Merge-Problem zwischen dem Projekt, LBank_Lasttest und de
 # Tests und Testergebnisse
 
 ### Welche Tests wurden durchgeführt?
-...
+
+- Book_TransferValidAmountBetweenLedgers() 
+    Dieser Test ist dafür da, um zu testen ob die Book Methode funktioniert, wenn eine valide Buchung von einem Ledger auf einen anderen Ledger durchgeführt wird.
+- Book_TransferMaxValidAmountBetweenLedgers()
+    Dieser Test ist dafür da, um zu testen ob die Methode Book funktioniert, wenn einem Ledger all sein übriges Geld abgebucht wird und er danach eine Balance von      0 hat.
+- Book_TransferInvalidAmountBetweenLedgers()
+    Dieser Test ist dafür da, um zu testen ob die Methode Book einen falschen Wert zurückgibt, wenn man versucht einem Ledger mehr Geld abzubuchen als er wirklich      hat.
 
 ### Wie wurden die Tests durchgeführt?
-...
+
+- Book_TransferValidAmountBetweenLedgers(), Book_TransferMaxValidAmountBetweenLedgers() und Book_TransferInvalidAmountBetweenLedgers()
+    Bei diesen drei Tests handelt es sich um Integrationstests, da wir keine Daten mocken, sondern wirklich eine richtige Datenbank verwenden. Zudem testen wir den     Rückgabewert der Methode und was mit der Balance der Ledger passiert und nicht ob die Methode aufgerufen wird. Dies ist der Unterschied zu den Unit-Tests.
 
 ### Was war das Resultat?
-...
+
+- Book_TransferValidAmountBetweenLedgers() 
+    ...
+- Book_TransferMaxValidAmountBetweenLedgers()
+    ...
+- Book_TransferInvalidAmountBetweenLedgers()
+    ...
