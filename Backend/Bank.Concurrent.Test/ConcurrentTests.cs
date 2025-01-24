@@ -3,7 +3,6 @@ using Bank.DbAccess.Data;
 using Bank.DbAccess.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Xunit.Abstractions;
 using Xunit.Microsoft.DependencyInjection.Abstracts;
 
@@ -12,46 +11,66 @@ namespace Bank.Concurrent.Test
 
 
 {
-    public class ConcurrentTests : TestBed<TestProjectFixture>
+    public class ConcurrentTests : IClassFixture<TestProjectFixture>
     {
-        private readonly AppDbContext? _context;
+        private readonly IBookingRepository _bookingRepository;
+        private readonly AppDbContext _dbContext;
 
-
-        public ConcurrentTests(ITestOutputHelper testOutputHelper, TestProjectFixture fixture)
-            : base(testOutputHelper, fixture)
+        public ConcurrentTests(TestProjectFixture fixture)
         {
-            _context = fixture.ServiceProvider.GetService<AppDbContext>();
+            var scope = fixture.ServiceProvider.CreateScope();
+            _dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            _bookingRepository = scope.ServiceProvider.GetRequiredService<IBookingRepository>();
+            SeedDatabase();
         }
 
+        private void SeedDatabase()
+        {
+            // Seed data for tests
+            const int totalLedgers = 100;
+            _dbContext.Ledgers.RemoveRange(_dbContext.Ledgers);
+            _dbContext.SaveChanges();
+
+            for (int i = 0; i < totalLedgers; i++)
+            {
+                _dbContext.Ledgers.Add(new Bank.Core.Models.Ledger { Id = i + 1, Balance = 1000m });
+            }
+ 
+            _dbContext.SaveChanges();
+        }
 
         [Fact]
         public async Task TestBookingParallel()
         {
-            var bookingRepository = _fixture.ServiceProvider.GetService<IBookingRepository>();
-            const int numberOfBookings = 1;
-            const int users = 2;
-
+            const int numberOfBookings = 100;
+            const int users = 10;
             Task[] tasks = new Task[users];
-            var allLedgers = await _context.Ledgers.OrderBy(ledger => ledger.Name).ToArrayAsync();
 
-            async Task UserAction(int bookingsCount, decimal startingMoney)
+            
+            var allLedgers = await _dbContext.Ledgers.OrderBy(ledger => ledger.Name).ToArrayAsync();
+
+            async Task UserAction()
             {
                 Random random = new Random();
                 for (int i = 0; i < numberOfBookings; i++)
                 {
-                    // Book methode testen
-                    // Implementieren Sie hier die parallelen Buchungen
-                    // Bestimmen sie zwei zufällige Ledgers
-                    var from = allLedgers[random.Next(allLedgers.Length)];
-                    var to = allLedgers[random.Next(allLedgers.Length)];
+                    var from = allLedgers[random.Next(allLedgers.Length-1)];
+                    var to = allLedgers[random.Next(allLedgers.Length-1)];
                     var amount = random.NextInt64(1, 101);
-                    await bookingRepository.Book(from.Id, to.Id, amount);
+                    try
+                    {
+                        _bookingRepository.Book(from.Id, to.Id, amount);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
                 }
             }
 
             for (int i = 0; i < users; i++)
             {
-                tasks[i] = Task.Run(() => UserAction(numberOfBookings, 1000));
+                tasks[i] = Task.Run(UserAction);
             }
 
             Task.WaitAll(tasks);

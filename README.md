@@ -15,10 +15,23 @@ Zusätzlich gab es ein Merge-Problem zwischen dem Projekt, LBank_Lasttest und de
 # Tests und Testergebnisse
 
 ### Welche Tests wurden durchgeführt?
-...
+
+- Book_TransferValidAmountBetweenLedgers() 
+    Dieser Test ist dafür da, um zu testen ob die Book Methode funktioniert, wenn eine valide Buchung von einem Ledger auf einen anderen Ledger durchgeführt wird.
+- Book_TransferMaxValidAmountBetweenLedgers()
+    Dieser Test ist dafür da, um zu testen ob die Methode Book funktioniert, wenn einem Ledger all sein übriges Geld abgebucht wird und er danach eine Balance von      0 hat.
+- Book_TransferInvalidAmountBetweenLedgers()
+    Dieser Test ist dafür da, um zu testen ob die Methode Book einen falschen Wert zurückgibt, wenn man versucht einem Ledger mehr Geld abzubuchen als er wirklich      hat.
+- Lasttest: Der Lasttest dient dazu, sicherzustellen, dass unsere Applikation auch unter hoher Last funktioniert.
 
 ### Wie wurden die Tests durchgeführt?
-...
+
+- Book_TransferValidAmountBetweenLedgers(), Book_TransferMaxValidAmountBetweenLedgers() und Book_TransferInvalidAmountBetweenLedgers()
+    Bei diesen drei Tests handelt es sich um Integrationstests, da wir keine Daten mocken, sondern wirklich eine richtige Datenbank verwenden. Zudem testen wir den     Rückgabewert der Methode und was mit der Balance der Ledger passiert und nicht ob die Methode aufgerufen wird. Dies ist der Unterschied zu den Unit-Tests.
+- Lasttest: Bei diesem Test handelt es sich um einen Test, welcher mithilfe von NBomber in kurzer Zeit sehr viele Injections auf unsere Webanwendung durchführt und schlussendlich ein Resultat herausgibt, wie viele dieser Injects erfolgreich durchgelaufen sind.
 
 ### Was war das Resultat?
-...
+
+- Book_TransferValidAmountBetweenLedgers(), Book_TransferMaxValidAmountBetweenLedgers(), Book_TransferInvalidAmountBetweenLedgers(): Bei diesen Tests gab es Probleme mit dem Build des Testprojekts. Allerdings wenn man Rider neu gestartet und gebuilded hat, sind alle Testfälle erfolgreich durchgelaufen.
+
+- Lasttest: Der Lasttest gibt ein detailliertes Resultat zurück, wie viele der Injects durchgelaufen sind und wie viele nicht durchgelaufen sind. Zudem gibt es noch die Datengröße, die verwendet wurde, und die Latenz aus.

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Options;
 using Moq;
+
 namespace TestProject1;
 
 public class LedgerRepositoryTests
@@ -22,7 +23,7 @@ public class LedgerRepositoryTests
 
         var databaseSettings = new DatabaseSettings
         {
-            ConnectionString = "FakeConnectionString" 
+            ConnectionString = "FakeConnectionString"
         };
 
         _mockOptions = new Mock<IOptions<DatabaseSettings>>();
@@ -47,11 +48,12 @@ public class LedgerRepositoryTests
     [Fact]
     public async Task Delete_InvalidId_ThrowsKeyNotFoundException()
     {
-        using var context = new AppDbContext(_options); 
+        using var context = new AppDbContext(_options);
         var repository = new LedgerRepository(_mockOptions.Object, context);
         var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() => repository.Delete(999));
         Assert.Equal("No Ledger with id 999", exception.Message);
     }
+
     [Fact]
     public async Task Delete_TransactionIsRolledBackOnFailure()
     {
@@ -64,9 +66,6 @@ public class LedgerRepositoryTests
         await Assert.ThrowsAsync<KeyNotFoundException>(() => repository.Delete(99));
 
         var existingLedger = await context.Ledgers.FindAsync(2);
-        Assert.NotNull(existingLedger);  
+        Assert.NotNull(existingLedger);
     }
-
-
-
 }
