@@ -22,16 +22,25 @@ Zusätzlich gab es ein Merge-Problem zwischen dem Projekt, LBank_Lasttest und de
     Dieser Test ist dafür da, um zu testen ob die Methode Book funktioniert, wenn einem Ledger all sein übriges Geld abgebucht wird und er danach eine Balance von      0 hat.
 - Book_TransferInvalidAmountBetweenLedgers()
     Dieser Test ist dafür da, um zu testen ob die Methode Book einen falschen Wert zurückgibt, wenn man versucht einem Ledger mehr Geld abzubuchen als er wirklich      hat.
+- TestBookingParallel()
+  Dieser Test ist dazu da, um zu prüfen dass selbst bei vielen zeitgleichen Buchungen auf vielen verschiedenen users, das Programm so funktioniert wie es sollte. 
 - Lasttest: Der Lasttest dient dazu, sicherzustellen, dass unsere Applikation auch unter hoher Last funktioniert.
 
 ### Wie wurden die Tests durchgeführt?
 
 - Book_TransferValidAmountBetweenLedgers(), Book_TransferMaxValidAmountBetweenLedgers() und Book_TransferInvalidAmountBetweenLedgers()
     Bei diesen drei Tests handelt es sich um Integrationstests, da wir keine Daten mocken, sondern wirklich eine richtige Datenbank verwenden. Zudem testen wir den     Rückgabewert der Methode und was mit der Balance der Ledger passiert und nicht ob die Methode aufgerufen wird. Dies ist der Unterschied zu den Unit-Tests.
+- TestBookingParallel()
+  Bei diesem Test handelt es sich ebenfalls um einen Integrationstest. Mithife von Dependency 
+  Injection werden die Abhängigkeiten AppDbContext und BookingRepository bereitgestellt. 
+  Anschliessend wird die Datenbank geseeded. Dann folgt der eigentliche Test. Zum Schluss wird 
+  darauf gewartet, dass alle Tasks abgeschlossen sind bevor der Test zu Ende geht. 
 - Lasttest: Bei diesem Test handelt es sich um einen Test, welcher mithilfe von NBomber in kurzer Zeit sehr viele Injections auf unsere Webanwendung durchführt und schlussendlich ein Resultat herausgibt, wie viele dieser Injects erfolgreich durchgelaufen sind.
 
 ### Was war das Resultat?
 
 - Book_TransferValidAmountBetweenLedgers(), Book_TransferMaxValidAmountBetweenLedgers(), Book_TransferInvalidAmountBetweenLedgers(): Bei diesen Tests gab es Probleme mit dem Build des Testprojekts. Allerdings wenn man Rider neu gestartet und gebuilded hat, sind alle Testfälle erfolgreich durchgelaufen.
+- TestBookingParallel()
+  
 
 - Lasttest: Der Lasttest gibt ein detailliertes Resultat zurück, wie viele der Injects durchgelaufen sind und wie viele nicht durchgelaufen sind. Zudem gibt es noch die Datengröße, die verwendet wurde, und die Latenz aus.
