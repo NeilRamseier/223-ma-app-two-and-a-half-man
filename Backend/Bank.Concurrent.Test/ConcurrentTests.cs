@@ -27,7 +27,6 @@ namespace Bank.Concurrent.Test
 
         private void SeedDatabase()
         {
-            // Seed data for tests
             const int totalLedgers = 100;
             _dbContext.Ledgers.RemoveRange(_dbContext.Ledgers);
             _dbContext.SaveChanges();
