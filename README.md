@@ -34,13 +34,14 @@ Zusätzlich gab es ein Merge-Problem zwischen dem Projekt, LBank_Lasttest und de
   Bei diesem Test handelt es sich ebenfalls um einen Integrationstest. Mithife von Dependency 
   Injection werden die Abhängigkeiten AppDbContext und BookingRepository bereitgestellt. 
   Anschliessend wird die Datenbank geseeded. Dann folgt der eigentliche Test. Zum Schluss wird 
-  darauf gewartet, dass alle Tasks abgeschlossen sind bevor der Test zu Ende geht. 
+  darauf gewartet, dass alle Tasks abgeschlossen sind, bevor der Test zu Ende geht. 
 - Lasttest: Bei diesem Test handelt es sich um einen Test, welcher mithilfe von NBomber in kurzer Zeit sehr viele Injections auf unsere Webanwendung durchführt und schlussendlich ein Resultat herausgibt, wie viele dieser Injects erfolgreich durchgelaufen sind.
 
 ### Was war das Resultat?
 
 - Book_TransferValidAmountBetweenLedgers(), Book_TransferMaxValidAmountBetweenLedgers(), Book_TransferInvalidAmountBetweenLedgers(): Bei diesen Tests gab es Probleme mit dem Build des Testprojekts. Allerdings wenn man Rider neu gestartet und gebuilded hat, sind alle Testfälle erfolgreich durchgelaufen.
 - TestBookingParallel()
-  
+  Der Test ist grün, sofern der Endkontostand so ist wie erwartet und es keine Exceptions 
+  gegeben hat. Schlussendlich wird der Endkontostand geloggt.
 
 - Lasttest: Der Lasttest gibt ein detailliertes Resultat zurück, wie viele der Injects durchgelaufen sind und wie viele nicht durchgelaufen sind. Zudem gibt es noch die Datengröße, die verwendet wurde, und die Latenz aus.
