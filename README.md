@@ -32,10 +32,6 @@ Zusätzlich gab es ein Merge-Problem zwischen dem Projekt, LBank_Lasttest und de
 
 ### Was war das Resultat?
 
-- Book_TransferValidAmountBetweenLedgers() 
-    ...
-- Book_TransferMaxValidAmountBetweenLedgers()
-    ...
-- Book_TransferInvalidAmountBetweenLedgers()
-    ...
+- Book_TransferValidAmountBetweenLedgers(), Book_TransferMaxValidAmountBetweenLedgers(), Book_TransferInvalidAmountBetweenLedgers(): Bei diesen Tests gab es Probleme mit dem Build des Testprojekts. Allerdings wenn man Rider neu gestartet und gebuilded hat, sind alle Testfälle erfolgreich durchgelaufen.
+
 - Lasttest: Der Lasttest gibt ein detailliertes Resultat zurück, wie viele der Injects durchgelaufen sind und wie viele nicht durchgelaufen sind. Zudem gibt es noch die Datengröße, die verwendet wurde, und die Latenz aus.
