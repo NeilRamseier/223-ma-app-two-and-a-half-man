@@ -42,8 +42,8 @@ namespace Bank.Concurrent.Test
         [Fact]
         public async Task TestBookingParallel()
         {
-            const int numberOfBookings = 1;
-            const int users = 2;
+            const int numberOfBookings = 100;
+            const int users = 10;
             Task[] tasks = new Task[users];
 
             
@@ -54,9 +54,6 @@ namespace Bank.Concurrent.Test
                 Random random = new Random();
                 for (int i = 0; i < numberOfBookings; i++)
                 {
-                    // Book methode testen
-                    // Implementieren Sie hier die parallelen Buchungen
-                    // Bestimmen sie zwei zufällige Ledgers
                     var from = allLedgers[random.Next(allLedgers.Length-1)];
                     var to = allLedgers[random.Next(allLedgers.Length-1)];
                     var amount = random.NextInt64(1, 101);
