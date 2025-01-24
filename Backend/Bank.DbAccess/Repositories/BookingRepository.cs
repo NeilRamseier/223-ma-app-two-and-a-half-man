@@ -32,6 +32,7 @@ public class BookingRepository(
             var possibleBalance = from.Balance - amount;
             if (possibleBalance < 0)
             {
+
                 return false;
             }
 
@@ -49,6 +50,7 @@ public class BookingRepository(
             catch (Exception e)
             {
                 await transaction.RollbackAsync();
+
             }
         }
 

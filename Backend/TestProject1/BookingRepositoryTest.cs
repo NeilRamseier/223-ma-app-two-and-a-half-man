@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Transactions;
 using Bank.Core.Models;
 using Bank.DbAccess.Data;
 using Bank.DbAccess.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MySqlConnector;
 using TestProject1;
@@ -12,61 +14,68 @@ using static Bank.DbAccess.Repositories.IBookingRepository;
 
 namespace BookingTest
 {
-    public class BookingRepositoryTest : TestBed<TestProjectFixture>
+    public class BookingRepositoryTest : IClassFixture<TestProjectFixture>
     {
-        private readonly AppDbContext? _context;
+        private readonly IBookingRepository _bookingRepository;
+        private readonly AppDbContext _dbContext;
 
-        public BookingRepositoryTest(ITestOutputHelper testOutputHelper, TestProjectFixture fixture)
-            : base(testOutputHelper, fixture)
+        public BookingRepositoryTest(TestProjectFixture fixture)
         {
-            _context = fixture.ServiceProvider.GetService<AppDbContext>();
+            var scope = fixture.ServiceProvider.CreateScope();
+            _dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            _bookingRepository = scope.ServiceProvider.GetRequiredService<IBookingRepository>();
+        }
+
+        private void SeedDatabase()
+        {
+            _dbContext.Ledgers.RemoveRange(_dbContext.Ledgers);
+            _dbContext.SaveChanges();
+            _dbContext.Ledgers.Add(new Bank.Core.Models.Ledger { Id = 30, Balance = 200 });
+            _dbContext.Ledgers.Add(new Bank.Core.Models.Ledger { Id = 31, Balance = 100 });
+            _dbContext.SaveChanges();
         }
 
         [Fact]
-        public void Book_TransferValidAmountBetweenLedgers()
+        public async Task Book_TransferValidAmountBetweenLedgers()
         {
-            var bookingRepository = _fixture.ServiceProvider.GetService<IBookingRepository>()!;
-            var sourceLedgerId = 1;
-            var destinationLedgerId = 2;
-            decimal amount = 100;
-            
-            var sourceLedger = new Ledger { Id = sourceLedgerId, Balance = 200};
-            var destinationLedger = new Ledger { Id = destinationLedgerId, Balance = 50};
-            
-            bookingRepository.Book(sourceLedger.Id, destinationLedger.Id, amount);
-            
-            Assert.Equal(100, sourceLedger.Balance);
+            decimal amount = 50;
+
+            SeedDatabase();
+            var sourceLedger = await _dbContext.Ledgers.FindAsync(30);
+            var destinationLedger = await _dbContext.Ledgers.FindAsync(31);
+
+            await _bookingRepository.Book(sourceLedger.Id, destinationLedger.Id, amount);
+
+            Assert.Equal(150, sourceLedger.Balance);
             Assert.Equal(150, destinationLedger.Balance);
         }
+
         [Fact]
-        public void Book_TransferMaxValidAmountBetweenLedgers()
+        public async Task Book_TransferMaxValidAmountBetweenLedgers()
         {
-            var bookingRepository = _fixture.ServiceProvider.GetService<IBookingRepository>()!;
-            var sourceLedgerId = 1;
-            var destinationLedgerId = 2;
-            decimal amount = 100;
-            
-            var sourceLedger = new Ledger { Id = sourceLedgerId, Balance = 100};
-            var destinationLedger = new Ledger { Id = destinationLedgerId, Balance = 200};
-            
-            bookingRepository.Book(sourceLedger.Id, destinationLedger.Id, amount);
-            
+            decimal amount = 200;
+
+            SeedDatabase();
+            var sourceLedger = await _dbContext.Ledgers.FindAsync(30);
+            var destinationLedger = await _dbContext.Ledgers.FindAsync(31);
+
+            await _bookingRepository.Book(sourceLedger.Id, destinationLedger.Id, amount);
+
             Assert.Equal(0, sourceLedger.Balance);
             Assert.Equal(300, destinationLedger.Balance);
         }
-        [Fact]
-        public void Book_TransferInvalidAmountBetweenLedgers()
-        {
-            var bookingRepository = _fixture.ServiceProvider.GetService<IBookingRepository>()!;
-            var sourceLedgerId = 1;
-            var destinationLedgerId = 2;
-            decimal amount = 100;
-            
-            var sourceLedger = new Ledger { Id = sourceLedgerId, Balance = 80};
-            var destinationLedger = new Ledger { Id = destinationLedgerId, Balance = 200};
 
-            var task = bookingRepository.Book(sourceLedger.Id, destinationLedger.Id, amount);
-            Assert.False(task.Result);
+        [Fact]
+        public async Task Book_TransferInvalidAmountBetweenLedgers()
+        {
+            decimal amount = 300;
+
+            SeedDatabase();
+            var sourceLedger = await _dbContext.Ledgers.FindAsync(30);
+            var destinationLedger = await _dbContext.Ledgers.FindAsync(31);
+
+            var task = await _bookingRepository.Book(sourceLedger.Id, destinationLedger.Id, amount);
+            Assert.False(task);
         }
     }
 }
