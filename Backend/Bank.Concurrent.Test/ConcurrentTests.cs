@@ -1,5 +1,4 @@
-﻿
-using Bank.DbAccess.Data;
+﻿using Bank.DbAccess.Data;
 using Bank.DbAccess.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,12 +14,14 @@ namespace Bank.Concurrent.Test
     {
         private readonly IBookingRepository _bookingRepository;
         private readonly AppDbContext _dbContext;
+        private readonly ITestOutputHelper output;
 
-        public ConcurrentTests(TestProjectFixture fixture)
+        public ConcurrentTests(TestProjectFixture fixture, ITestOutputHelper output)
         {
             var scope = fixture.ServiceProvider.CreateScope();
             _dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             _bookingRepository = scope.ServiceProvider.GetRequiredService<IBookingRepository>();
+            this.output = output;
             SeedDatabase();
         }
 
@@ -35,7 +36,7 @@ namespace Bank.Concurrent.Test
             {
                 _dbContext.Ledgers.Add(new Bank.Core.Models.Ledger { Id = i + 1, Balance = 1000m });
             }
- 
+
             _dbContext.SaveChanges();
         }
 
@@ -46,24 +47,31 @@ namespace Bank.Concurrent.Test
             const int users = 10;
             Task[] tasks = new Task[users];
 
-            
-            var allLedgers = await _dbContext.Ledgers.OrderBy(ledger => ledger.Name).ToArrayAsync();
 
-            async Task UserAction()
+            var allLedgers = await _dbContext.Ledgers.OrderBy(ledger => ledger.Name).ToArrayAsync();
+            decimal initialTotalBalance = allLedgers.Sum(l => l.Balance);
+            var exceptions = new List<Exception>();
+            var random = new Random();
+
+            void UserAction()
             {
-                Random random = new Random();
                 for (int i = 0; i < numberOfBookings; i++)
                 {
-                    var from = allLedgers[random.Next(allLedgers.Length-1)];
-                    var to = allLedgers[random.Next(allLedgers.Length-1)];
+                    var from = allLedgers[random.Next(allLedgers.Length)];
+                    var to = allLedgers[random.Next(allLedgers.Length)];
+
+                    if (from.Id == to.Id) continue;
                     var amount = random.NextInt64(1, 101);
                     try
                     {
                         _bookingRepository.Book(from.Id, to.Id, amount);
                     }
-                    catch (Exception e)
+                    catch (Exception ex)
                     {
-                        Console.WriteLine(e);
+                        lock (exceptions)
+                        {
+                            exceptions.Add(ex);
+                        }
                     }
                 }
             }
@@ -74,6 +82,12 @@ namespace Bank.Concurrent.Test
             }
 
             Task.WaitAll(tasks);
+
+            Assert.Empty(exceptions);
+            var finalTotalBalance = allLedgers.Sum(l => l.Balance);
+            Assert.Equal(initialTotalBalance, finalTotalBalance);
+
+            output.WriteLine($"Test completed successfully. Total balance: {finalTotalBalance}");
         }
     }
 }
